@@ -1,15 +1,11 @@
 package main
 
 import (
-	"fmt"
-	"log"
-	"practice/internal/config"
+	"practice/internal/app"
 )
 
+const configsDir = "configs"
+
 func main() {
-	status, err := config.Run()
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("Project status:", status)
+	app.Run(configsDir)
 }
