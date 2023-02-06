@@ -10,13 +10,16 @@ type Handler struct {
 }
 
 func NewHandler(services *service.Services) *Handler {
-	return &Handler{
-		services: services,
-	}
+	return &Handler{services: services}
 }
 
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.Default()
+
+	auth := router.Group("/auth")
+	{
+		auth.POST("/sign-up", h.signUp)
+	}
 
 	api := router.Group("/api")
 	{

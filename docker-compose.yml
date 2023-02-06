@@ -1,0 +1,28 @@
+version: '3.4'
+
+services:
+  app:
+    image: books-backend-app
+    container_name: books-backend-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgresql
+    volumes:
+      - ./.bin/:/root/
+      - ./configs/:/root/configs/
+      - ./templates/:/root/templates/
+    env_file:
+      - .env
+
+  postgresql:
+    image: postgres
+    container_name: pg-docker
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=aman
+      - POSTGRES_PASSWORD=qwerty
