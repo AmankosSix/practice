@@ -1,10 +1,20 @@
 package repository
 
-import "github.com/jmoiron/sqlx"
+import (
+	"github.com/jmoiron/sqlx"
+	"practice/internal/domain"
+)
 
-type Repositories struct {
+type Authorization interface {
+	SignUp(user domain.User) (int, error)
 }
 
-func NewRepositories(db *sqlx.DB) *Repositories {
-	return &Repositories{}
+type Repository struct {
+	Authorization
+}
+
+func NewRepositories(db *sqlx.DB) *Repository {
+	return &Repository{
+		Authorization: NewUser(db),
+	}
 }

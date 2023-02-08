@@ -1,10 +1,20 @@
 package service
 
-import "practice/internal/repository"
+import (
+	"practice/internal/domain"
+	"practice/internal/repository"
+)
 
-type Services struct {
+type Authorization interface {
+	SignUp(user domain.SignUpInput) (int, error)
 }
 
-func NewServices(repos *repository.Repositories) *Services {
-	return &Services{}
+type Services struct {
+	Authorization
+}
+
+func NewServices(repos *repository.Repository) *Services {
+	return &Services{
+		Authorization: NewAuthService(repos.Authorization),
+	}
 }

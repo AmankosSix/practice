@@ -1,22 +1,26 @@
 package repository
 
 import (
-	"context"
-	"database/sql"
+	"fmt"
+	"github.com/jmoiron/sqlx"
+	"practice/internal/config"
 	"practice/internal/domain"
 )
 
-type Users struct {
-	db *sql.DB
+type User struct {
+	db *sqlx.DB
 }
 
-func NewUsers(db *sql.DB) *Users {
-	return &Users{db}
+func NewUser(db *sqlx.DB) *User {
+	return &User{db: db}
 }
 
-func (r *Users) Create(ctx context.Context, user domain.User) error {
-	_, err := r.db.Exec("INSERT INTO users (name, email, passowrd, registered_at) values ($1, $2, $3, $4)",
-		user.Name, user.Email, user.Password, user.RegisteredAt)
-
-	return err
+func (u *User) SignUp(user domain.User) (int, error) {
+	var id int
+	query := fmt.Sprintf("INSERT INTO %s (name, email, password, registered_at) values ($1, $2, $3, $4) RETURNING id", config.UsersTable)
+	row := u.db.QueryRow(query, user.Name, user.Email, user.Password, user.RegisteredAt)
+	if err := row.Scan(&id); err != nil {
+		return 0, err
+	}
+	return id, nil
 }

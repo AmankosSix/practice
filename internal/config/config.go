@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 	"os"
@@ -13,6 +14,10 @@ const (
 	defaultHttpMaxHeaderMegabytes = 1
 
 	EnvLocal = "local"
+)
+
+const (
+	UsersTable = "users"
 )
 
 type (
@@ -41,7 +46,7 @@ type (
 
 func Init(configsDir string) (*Config, error) {
 	populateDefaults()
-
+	fmt.Println(godotenv.Load())
 	if err := godotenv.Load(); err != nil {
 		return nil, err
 	}

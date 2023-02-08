@@ -1,35 +1,31 @@
 package http
 
 import (
-	"encoding/json"
 	"github.com/gin-gonic/gin"
-	"io"
 	"net/http"
 	"practice/internal/domain"
 )
 
-func (h *Handler) signUp(c gin.Context) {
-	reqBytes, err := io.ReadAll(r.Body)
-	if err != nil {
-		logError("signUp", err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
+func (h *Handler) signUp(c *gin.Context) {
 	var input domain.SignUpInput
-	if err = json.Unmarshal(reqBytes, &input); err != nil {
-		logError("signUp", err)
-		w.WriteHeader(http.StatusBadRequest)
+
+	if err := c.BindJSON(&input); err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err := input.Validate(); err != nil {
-		logError("signUp", err)
-		w.WriteHeader(http.StatusBadRequest)
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	err = h.user
+	id, err := h.services.SignUp(input)
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
 
-	w.WriteHeader(http.StatusOK)
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"id": id,
+	})
 }

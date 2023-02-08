@@ -1,38 +1,29 @@
 package service
 
 import (
-	"context"
+	"crypto/sha1"
+	"fmt"
 	"practice/internal/domain"
+	"practice/internal/repository"
 	"time"
 )
 
-type PasswordHasher interface {
-	Hash(password string) (string, error)
+const (
+	salt = "someSalt"
+	//signingKey = "sfesf25r23efer23rf"
+	//tokenTTL   = 12 * time.Hour
+)
+
+type AuthService struct {
+	repo repository.Authorization
 }
 
-type UsersRepository interface {
+func NewAuthService(repo repository.Authorization) *AuthService {
+	return &AuthService{repo: repo}
 }
 
-type Users struct {
-	repo   UsersRepository
-	hasher PasswordHasher
-
-	hmacSecret []byte
-}
-
-func NewUsers(repo UsersRepository, hasher PasswordHasher, secret []byte) *Users {
-	return &Users{
-		repo:       repo,
-		hasher:     hasher,
-		hmacSecret: secret,
-	}
-}
-
-func (s *Users) SignUp(ctx context.Context, input domain.SignUpInput) error {
-	password, err := s.hasher.Hash(input.Password)
-	if err != nil {
-		return err
-	}
+func (s *AuthService) SignUp(input domain.SignUpInput) (int, error) {
+	password := generatePasswordHash(input.Password)
 
 	user := domain.User{
 		Name:         input.Name,
@@ -41,5 +32,12 @@ func (s *Users) SignUp(ctx context.Context, input domain.SignUpInput) error {
 		RegisteredAt: time.Now(),
 	}
 
-	return s.repo
+	return s.repo.SignUp(user)
+}
+
+func generatePasswordHash(password string) string {
+	hash := sha1.New()
+	hash.Write([]byte(password))
+
+	return fmt.Sprintf("%x", hash.Sum([]byte(salt)))
 }
